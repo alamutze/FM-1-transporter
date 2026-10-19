@@ -1,0 +1,22 @@
+name: Build FM-1 Transporter
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi cmake
+      - name: Build
+        run: |
+          cmake -B build -DPICO_BOARD=seeed_xiao_rp2040
+          cmake --build build
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fm1_transporter_uf2
+          path: build/*.uf2
