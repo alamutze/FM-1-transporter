@@ -4,14 +4,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code and Submodules
+      - name: Checkout FM-1 Transporter Code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: recursive # This handles the project's own submodules (like pico-pio-usb)
+
+      - name: Clone Raspberry Pi Pico-SDK
+        uses: actions/checkout@v4
+        with:
+          repository: raspberrypi/pico-sdk
+          path: pico-sdk # Clones it into a folder named pico-sdk
+          submodules: recursive # Initializes TinyUSB and other nested SDK dependencies
+
       - name: Install Toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-arm-none-eabi cmake
+
       - name: Build
         run: |
           cmake -B build \
@@ -19,6 +28,7 @@ jobs:
             -DPICO_SDK_PATH=${{ github.workspace }}/pico-sdk \
             -DFM1T_LOADER_BIN=${{ github.workspace }}/wl82loader.bin
           cmake --build build
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
